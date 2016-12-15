@@ -19,7 +19,9 @@
 #import "RCTJavaScriptLoader.h"
 #import "RCTLinkingManager.h"
 #import "RCTRootView.h"
+#if !TARGET_OS_TV
 #import "RCTPushNotificationManager.h"
+#endif
 
 @interface AppDelegate() <RCTBridgeDelegate>
 
@@ -53,8 +55,8 @@
 
 - (NSURL *)sourceURLForBridge:(__unused RCTBridge *)bridge
 {
-  NSURL *jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"Examples/UIExplorer/js/UIExplorerApp.ios" fallbackResource:nil];
-
+  NSURL *jsCodeLocation = [[RCTBundleURLProvider sharedSettings] jsBundleURLForBundleRoot:@"Examples/UIExplorer/js/UIExplorerApp.ios"
+                                                                         fallbackResource:nil];
   if (!getenv("CI_USE_PACKAGER")) {
     jsCodeLocation = [[NSBundle mainBundle] URLForResource:@"main" withExtension:@"jsbundle"];
   }
@@ -71,13 +73,17 @@
 }
 
 - (void)loadSourceForBridge:(RCTBridge *)bridge
-                  withBlock:(RCTSourceLoadBlock)loadCallback
+                 onProgress:(RCTSourceLoadProgressBlock)onProgress
+                 onComplete:(RCTSourceLoadBlock)loadCallback
 {
   [RCTJavaScriptLoader loadBundleAtURL:[self sourceURLForBridge:bridge]
+                            onProgress:onProgress
                             onComplete:loadCallback];
 }
 
 # pragma mark - Push Notifications
+
+#if !TARGET_OS_TV
 
 // Required to register for notifications
 - (void)application:(__unused UIApplication *)application didRegisterUserNotificationSettings:(UIUserNotificationSettings *)notificationSettings
@@ -108,5 +114,7 @@
 {
   [RCTPushNotificationManager didReceiveLocalNotification:notification];
 }
+
+#endif
 
 @end
